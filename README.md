@@ -1,5 +1,8 @@
 # Veterinary Discharge Note Generator
 
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)]
+[![Conda Supported](https://img.shields.io/badge/conda-supported-brightgreen)]
+
 This script generates discharge notes for pet owners based on consultation data provided in JSON format using the Llama 3 model via the Together.ai API.
 
 ## Overview
@@ -102,7 +105,3 @@ The script includes basic error handling for:
 ## Contributing
 
 Contributions to this project are welcome. Please feel free to submit pull requests or open issues for any bugs or enhancements.
-
-## License
-
-[Specify your license here, e.g., MIT License]
