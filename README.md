@@ -63,19 +63,19 @@ Before running the script, ensure you have the following:
 
 ## Directory Structure
 
-veterinary_discharge_notes_generator/
-├── data/
-│   ├── consultation1.json
-│   └── consultation2.json
-├── scripts/
-│   ├── .env
-│   └── generate_discharge_notes.py
-├── solution/
-│   ├── consultation1_discharge_note.json
-│   └── consultation2_discharge_note.json
-├── .gitignore
-├── environment.yml
-└── README.md
+* `veterinary_discharge_notes_generator/`
+    * `data/`
+        * `consultation1.json`
+        * `consultation2.json`
+    * `scripts/`
+        * `.env`
+        * `generate_discharge_notes.py`
+    * `solution/`
+        * `consultation1_discharge_note.json`
+        * `consultation2_discharge_note.json`
+    * `.gitignore`
+    * `environment.yml`
+    * `README.md`
 
 ## Dependencies
 
