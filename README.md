@@ -1,3 +1,5 @@
+# veterinary_discharge_notes_generator
+In this repository a smart tool that automates the creation of veterinary discharge notes using LLMs can be seen
 # Veterinary Discharge Note Generator
 
 This script generates discharge notes for pet owners based on consultation data provided in JSON format using the Llama 3 model via the Together.ai API.
