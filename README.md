@@ -1,5 +1,3 @@
-# veterinary_discharge_notes_generator
-In this repository a smart tool that automates the creation of veterinary discharge notes using LLMs can be seen
 # Veterinary Discharge Note Generator
 
 This script generates discharge notes for pet owners based on consultation data provided in JSON format using the Llama 3 model via the Together.ai API.
@@ -21,7 +19,7 @@ Before running the script, ensure you have the following:
 1.  **Clone the repository (if you haven't already):**
 
     ```bash
-    git clone <repository_url>
+    git clone git@github.com:adriangar8/veterinary_discharge_notes_generator.git
     cd veterinary_discharge_notes_generator
     ```
 
@@ -30,12 +28,6 @@ Before running the script, ensure you have the following:
     ```bash
     conda env create -f environment.yml
     conda activate vet_notes
-    ```
-
-    Alternatively, you can install the required packages using pip:
-
-    ```bash
-    pip install -r requirements.txt
     ```
 
 3.  **Create a `.env` file in the `scripts` directory:**
