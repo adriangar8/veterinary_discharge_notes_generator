@@ -1,2 +1,39 @@
-# veterinary_discharge_notes_generator
-In this repository a smart tool that automates the creation of veterinary discharge notes using LLMs can be seen
+# Veterinary Discharge Notes Generator
+
+![Python Version](https://img.shields.io/badge/python-3.9%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Conda](https://img.shields.io/badge/conda-supported-brightgreen)
+
+An AI-powered tool for generating veterinary discharge notes from consultation data.
+
+## Installation (Conda)
+
+```bash
+# Clone repository
+git clone https://github.com/yourusername/veterinary-notes-generator.git
+cd veterinary-notes-generator
+
+# Create conda environment
+conda create -n vetnotes python=3.9 -y
+
+# Activate environment
+conda activate vetnotes
+
+# Install dependencies
+conda install --file requirements.txt -c conda-forge
+```
+
+## Configuration
+
+1. Get API key from Together.ai
+2. Create .env file on scripts directory (.../veterinary_discharge_notes/scripts/):
+
+```bash
+echo "TOGETHER_API_KEY=your_api_key_here" > .env
+```
+
+## Usage 
+
+```bash
+conda activate vetnotes
+python scripts/generate_discharge_notes.py data/consultation_sample.json```
