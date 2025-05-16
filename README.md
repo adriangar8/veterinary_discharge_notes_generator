@@ -6,6 +6,17 @@
 
 An AI-powered tool for generating veterinary discharge notes from consultation data.
 
+## Project Structure
+
+veterinary-notes-generator/
+├── data/ # Sample consultation JSON files
+├── solution/ # Generated discharge notes
+├── scripts/
+│ ├── generate_discharge_notes.py # Main script
+│ └── .env # API keys (gitignored)
+├── requirements.txt # Python dependencies
+└── environment.yml # Conda environment spec
+
 ## Installation (Conda)
 
 ```bash
@@ -36,4 +47,9 @@ echo "TOGETHER_API_KEY=your_api_key_here" > .env
 
 ```bash
 conda activate vetnotes
-python scripts/generate_discharge_notes.py data/consultation_sample.json```
+python scripts/generate_discharge_notes.py data/consultation_sample.json
+```
+
+## License
+
+MIT License
