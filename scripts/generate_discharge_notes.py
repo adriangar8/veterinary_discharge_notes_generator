@@ -1,3 +1,4 @@
+
 # -- import necessary libraries --
 import os
 import json
@@ -17,23 +18,33 @@ def validate_input_file(file_path):
     
     """Validate the input file exists and is a .json file."""
     
-    if not os.path.exists(file_path): # check if file exists
+    if not os.path.exists(file_path):
         raise FileNotFoundError(f"Error: The file '{file_path}' does not exist.")
     
-    if not file_path.lower().endswith('.json'): # check if file is a .json file
+    if not file_path.lower().endswith('.json'):
         raise ValueError("Error: Input file must be a .json file.")
     
     try:
         with open(file_path, 'r') as f:
-            json.load(f) # check if file contains valid JSON
+            json.load(f)
             
-    except json.JSONDecodeError: # JSON decode error
+    except json.JSONDecodeError:
         raise ValueError(f"Error: The file '{file_path}' contains invalid JSON.")
-    
-# -- api key validation function --
-def validate_api_key(key: str) -> bool:
-    return key.startswith('di-')  # DeepInfra API keys typically start with 'di-'
 
+# -- utility function to save discharge note to solution directory --
+def save_discharge_note(input_path: str, output: Dict[str, Any]):
+    
+    """Save discharge note to solution directory with proper naming convention"""
+    
+    solution_dir = Path(input_path).parent.parent / "solution"
+    solution_dir.mkdir(exist_ok=True)
+    
+    input_name = Path(input_path).stem
+    output_file = solution_dir / f"{input_name}_discharge_note.json"
+    
+    with open(output_file, 'w') as f:
+        json.dump(output, f, indent=4)
+        
 # -------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------
 
@@ -42,21 +53,18 @@ def validate_api_key(key: str) -> bool:
 # -- discharge notes generation function --
 def generate_discharge_note(consultation_data):
     
-    """Generates a discharge note using Llama 3 via DeepInfra."""
+    """Generates a discharge note using Llama 3 via Together.ai"""
     
-    load_dotenv()
-    api_key = os.getenv("DEEPINFRA_API_KEY")
+    load_dotenv() # load environment variables from .env file
+    api_key = os.getenv("TOGETHER_API_KEY") # get API key from environment variable
     
     if not api_key: # check if API key is set
-        raise ValueError("API key not found. Please set DEEPINFRA_API_KEY in .env file")
-    
-    if not validate_api_key(api_key): # validate API key format
-        raise ValueError("Invalid DeepInfra API key format")
+        raise ValueError("API key not found. Please set TOGETHER_API_KEY in .env file")
     
     client = OpenAI(
-        base_url="https://api.deepinfra.com/v1/openai",
+        base_url="https://api.together.xyz/v1",
         api_key=api_key
-    )
+    ) # initialize the API client
     
     prompt = f"""
     You are a veterinary assistant tasked with writing clear, compassionate discharge notes for pet owners.
@@ -70,19 +78,21 @@ def generate_discharge_note(consultation_data):
     
     Consultation Data:
     {json.dumps(consultation_data, indent=2)}
-    """
+    """ # format of the prompt with consultation data
     
     try:
+        
         response = client.chat.completions.create(
-            model="meta-llama/Meta-Llama-3-70B-Instruct",
+            model="meta-llama/Llama-3-70b-chat-hf", # model used for generating text
             messages=[
                 {"role": "system", "content": "You are a helpful veterinary assistant."},
                 {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=500  # Llama 3 can handle longer outputs
+            ], # user message
+            temperature=0.7, # allow some creativity
+            max_tokens=500 # limit the response length
         )
-        return response.choices[0].message.content.strip()
+        
+        return response.choices[0].message.content.strip() # extract the generated text from the response and return it
     
     except Exception as e:
         raise ValueError(f"API request failed: {str(e)}")
@@ -95,42 +105,27 @@ def generate_discharge_note(consultation_data):
 # -- main function to handle command line arguments and generate discharge notes --
 def main():
     
-    if len(sys.argv) != 2: # check if correct number of arguments is provided
-        
+    if len(sys.argv) != 2: # script should only accept one argument
         print("Usage: python generate_discharge_notes.py <path_to_json_file>")
         sys.exit(1)
     
-    input_file = sys.argv[1] # get the input file path
+    input_file = sys.argv[1] # path to the input JSON file
     
     try:
         
-        validate_input_file(input_file) # validate input file before processing
+        validate_input_file(input_file) # validate the input file
         
-        with open(input_file, 'r') as f: # load and process the consultation data
-            
-            consultation_data = json.load(f)
+        with open(input_file, 'r') as f:
+            consultation_data = json.load(f) # load the consultation data
         
-        discharge_note = generate_discharge_note(consultation_data)
+        discharge_note = generate_discharge_note(consultation_data) # generate the discharge note
+        output = {"discharge_note": discharge_note}
         
-        output = {
-            "discharge_note": discharge_note
-        }
-        
-        print(json.dumps(output, indent=4))
-        
-    except FileNotFoundError as e:
-        
-        print(str(e))
-        sys.exit(1)
-        
-    except ValueError as e:
-        
-        print(str(e))
-        sys.exit(1)
+        save_discharge_note(input_file, output) # 
         
     except Exception as e:
         
-        print(f"Error: {str(e)}")
+        print(f"Error: {str(e)}", file=sys.stderr)
         sys.exit(1)
 
 # -------------------------------------------------------------------------------------------------------
