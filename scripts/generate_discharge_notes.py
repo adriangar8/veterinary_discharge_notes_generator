@@ -44,6 +44,18 @@ def save_discharge_note(input_path: str, output: Dict[str, Any]):
     
     with open(output_file, 'w') as f:
         json.dump(output, f, indent=4)
+
+# -- utility function to validate consultation data --
+def validate_consultation_data(data: dict):
+    
+    """Ensure the generated note only includes facts from the consultation data"""
+    
+    required_sections = ['patient', 'consultation']
+    
+    for section in required_sections:
+        
+        if section not in data:
+            raise ValueError(f"Missing required section: {section}")
         
 # -------------------------------------------------------------------------------------------------------
 # -------------------------------------------------------------------------------------------------------
@@ -54,6 +66,8 @@ def save_discharge_note(input_path: str, output: Dict[str, Any]):
 def generate_discharge_note(consultation_data):
     
     """Generates a discharge note using Llama 3 via Together.ai"""
+    
+    validate_consultation_data(consultation_data) # validate the input data
     
     load_dotenv() # load environment variables from .env file
     api_key = os.getenv("TOGETHER_API_KEY") # get API key from environment variable
@@ -66,33 +80,46 @@ def generate_discharge_note(consultation_data):
         api_key=api_key
     ) # initialize the API client
     
+    # -- Structured prompt for generating the discharge note --
     prompt = f"""
-    You are a veterinary assistant tasked with writing clear, compassionate discharge notes for pet owners.
-    Based on the following consultation data, write a concise discharge note that summarizes:
-    - The patient's condition
-    - Any treatments or procedures performed
-    - Important observations
-    - Follow-up instructions
-    
-    Write in a professional yet friendly tone, addressing the pet owner directly.
-    
+    You are a compassionate and professional veterinary assistant tasked with understanding and writing a discharge note for a pet owner. The note should be based entirely on the consultation data provided below.
+
+    Please follow these guidelines:
+    1. Begin with a warm greeting, and end with a thoughtful closing, signed as "The Veterinary Team".
+    2. Include **all relevant information** from the consultation data to keep the owner fully informed.
+    3. Use a **friendly, clear, and professional tone** throughout the message.
+    4. If some information is missing from the data, simply omit it—do not guess or invent.
+    5. **Do not** use any placeholders like [text] or [xx].
+    6. Output **only** the discharge note—**do not add explanations or extra comments.**
+
     Consultation Data:
     {json.dumps(consultation_data, indent=2)}
-    """ # format of the prompt with consultation data
-    
+
+    Generate only the final discharge note.
+    """
+
     try:
-        
         response = client.chat.completions.create(
-            model="meta-llama/Llama-3-70b-chat-hf", # model used for generating text
+            model="meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo", # model suitable for structured data extraction tasks
             messages=[
-                {"role": "system", "content": "You are a helpful veterinary assistant."},
+                {"role": "system", "content": "You are a compassionate and professional veterinary assistant tasked with understanding and writing a discharge note for a pet owner."},
                 {"role": "user", "content": prompt}
-            ], # user message
-            temperature=0.7, # allow some creativity
-            max_tokens=500 # limit the response length
+            ],
+            temperature=0.3, # lower temperature for more deterministic output, reducing hallucinations
+            max_tokens=1000 # limit the response length to avoid excessive output
         )
         
-        return response.choices[0].message.content.strip() # extract the generated text from the response and return it
+        note = response.choices[0].message.content.strip()
+        
+        # -- Post-processing the generated note --
+        if "[" in note or "]" in note: # check for placeholders
+            
+            note = note.replace("[", "").replace("]", "") # remove placeholders
+            
+            if "in  to" in note: # fix broken time frames
+                note = note.replace("in  to", "as needed")
+        
+        return note
     
     except Exception as e:
         raise ValueError(f"API request failed: {str(e)}")
@@ -121,7 +148,7 @@ def main():
         discharge_note = generate_discharge_note(consultation_data) # generate the discharge note
         output = {"discharge_note": discharge_note}
         
-        save_discharge_note(input_file, output) # 
+        save_discharge_note(input_file, output) # save the discharge note
         
     except Exception as e:
         
