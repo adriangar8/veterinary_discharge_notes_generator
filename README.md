@@ -26,7 +26,7 @@ Before running the script, ensure you have the following:
 2.  **Create and activate the Conda environment (recommended):**
 
     ```bash
-    conda env create -f environment.yml
+    conda env create -n vet_notes -f environment.yml
     conda activate vet_notes
     ```
 
